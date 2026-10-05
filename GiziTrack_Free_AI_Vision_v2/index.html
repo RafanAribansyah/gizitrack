@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101828">
+  <meta name="description" content="GiziTrack — scan makanan, estimasi gizi, dan pantau nutrisi harian.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>GiziTrack</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#fff;--ink:#111827;--muted:#667085;--line:#e4e7ec;
+      --brand:#101828;--accent:#19a974;--accent2:#e9f8f1;--danger:#d92d20;
+      --shadow:0 10px 28px rgba(16,24,40,.08);--radius:20px
+    }
+    *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    body{padding-bottom:88px}.app{max-width:760px;margin:auto;padding:18px 16px 20px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:10px}.logo{width:40px;height:40px;border-radius:13px;background:var(--brand);display:grid;place-items:center;color:#fff;font-size:20px}
+    h1,h2,h3,p{margin:0}.title{font-size:24px;font-weight:800;letter-spacing:-.4px}.sub{font-size:13px;color:var(--muted);margin-top:2px}
+    .iconbtn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 12px;font-size:18px;cursor:pointer}
+    .view{display:none}.view.active{display:block}.grid{display:grid;gap:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+    .hero{background:linear-gradient(145deg,#101828,#344054);color:#fff;border:0;overflow:hidden;position:relative}
+    .hero:after{content:"";position:absolute;right:-40px;top:-80px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+    .hero .muted{color:#d0d5dd}.hero h2{font-size:18px}.hero .big{font-size:40px;font-weight:850;letter-spacing:-1px;margin-top:8px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row.start{align-items:flex-start}.muted{color:var(--muted)}
+    .progress{height:9px;background:#eaecf0;border-radius:999px;overflow:hidden;margin-top:10px}.progress>span{display:block;height:100%;background:var(--accent);border-radius:999px}
+    .stat{padding:12px;border-radius:16px;background:#f8fafc;border:1px solid #eef2f6}.stat .num{font-weight:800;font-size:20px;margin-top:3px}.stat .lab{font-size:12px;color:var(--muted)}
+    .meal{display:flex;gap:12px;align-items:flex-start}.thumb{width:64px;height:64px;border-radius:16px;object-fit:cover;background:#eef2f6;flex:none}
+    .meal .name{font-weight:750}.meal .meta{font-size:12px;color:var(--muted);margin-top:4px}.meal .cal{font-weight:800;white-space:nowrap}
+    .tag{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:var(--accent2);color:#087443;font-weight:700;font-size:11px}
+    .btn{border:0;border-radius:14px;padding:12px 14px;font-weight:750;cursor:pointer;font-size:14px}.btn.primary{background:var(--brand);color:#fff}.btn.green{background:var(--accent);color:#fff}.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn.danger{background:#fff3f2;color:var(--danger);border:1px solid #ffd5d2}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .scanbox{border:1.5px dashed #98a2b3;border-radius:18px;padding:18px;text-align:center;background:#fafbfc}
+    .scanpreview{width:100%;max-height:300px;object-fit:cover;border-radius:16px;display:none;margin-top:12px}.file{display:none}
+    label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}.input{width:100%;padding:12px;border-radius:13px;border:1px solid #d0d5dd;background:#fff;font:inherit;outline:none}.input:focus{border-color:#98a2b3;box-shadow:0 0 0 3px #f2f4f7}
+    .macrobar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.macro{padding:10px;background:#f8fafc;border-radius:13px;text-align:center}.macro b{display:block;font-size:16px}.macro span{font-size:11px;color:var(--muted)}
+    .loading{display:none;align-items:center;gap:10px;padding:12px;border-radius:14px;background:#f8fafc;border:1px solid var(--line);margin-top:12px}.loading.on{display:flex}.dot{width:9px;height:9px;background:var(--accent);border-radius:50%;animation:pulse 1s infinite}.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}@keyframes pulse{50%{opacity:.2;transform:scale(.8)}}
+    .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:30;padding:8px max(10px,calc((100% - 720px)/2));display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+    .nav button{border:0;background:transparent;color:#667085;padding:8px;border-radius:14px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.nav button.active{background:#f2f4f7;color:#111827}.nav .ni{font-size:20px;display:block;margin-bottom:2px}
+    .section-title{font-size:15px;font-weight:800;margin:4px 0 10px}.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+    .toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:.22s;z-index:50;max-width:88%}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .small{font-size:11px;line-height:1.45}.note{padding:11px 12px;border-radius:13px;background:#fffaeb;border:1px solid #fedf89;color:#7a4f01;font-size:12px;line-height:1.45}
+    .resultimg{width:100%;max-height:220px;object-fit:cover;border-radius:16px;display:none}.list{display:grid;gap:10px}.item{padding:12px;border:1px solid var(--line);border-radius:15px}.itemgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.itemgrid .input{padding:9px}
+    .install{display:none}.install.show{display:block}
+.calc-hero{background:linear-gradient(145deg,#0f172a,#344054);color:#fff;border-radius:18px;padding:16px}
+.calc-big{font-size:34px;font-weight:850;letter-spacing:-.7px;margin-top:4px}
+.bmi{font-size:30px;font-weight:850}.bmi-label{font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;display:inline-block}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+.goal-card{border:1px solid var(--line);border-radius:16px;padding:13px;background:#fff}
+.goal-card.selected{box-shadow:0 0 0 2px #111827}.choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+    @media(min-width:700px){.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🥗</div>
+      <div><div class="title">GiziTrack</div><div class="sub">AI Vision gratis di perangkat → estimasi gizi → catatan harian</div></div>
+    </div>
+    <button class="iconbtn" onclick="showView('settings')">⚙️</button>
+  </div>
+
+  <section id="home" class="view active">
+    <div class="grid">
+      <div class="card hero">
+        <div class="row"><div><div class="muted">Total hari ini</div><h2>Kalori</h2></div><span class="tag" style="background:rgba(255,255,255,.12);color:#fff">Live</span></div>
+        <div class="big"><span id="sumCal">0</span> <span style="font-size:18px;font-weight:600">/ <span id="goalCal">2000</span> kcal</span></div>
+        <div class="progress" style="background:rgba(255,255,255,.15)"><span id="calProg" style="background:#fff"></span></div>
+      </div>
+
+      <div class="grid2">
+        <div class="stat"><div class="lab">Protein</div><div class="num"><span id="sumP">0</span>g</div><div class="progress"><span id="pProg"></span></div></div>
+        <div class="stat"><div class="lab">Karbohidrat</div><div class="num"><span id="sumC">0</span>g</div><div class="progress"><span id="cProg"></span></div></div>
+      </div>
+      <div class="stat"><div class="lab">Lemak</div><div class="num"><span id="sumF">0</span>g</div><div class="progress"><span id="fProg"></span></div></div>
+
+      <div class="row">
+        <div class="section-title" style="margin:0">Makanan hari ini</div>
+        <button class="btn green" onclick="showView('scan')">＋ Scan makanan</button>
+      </div>
+      <div id="todayList" class="card list"></div>
+
+      <div class="note"><b>Catatan:</b> estimasi dari foto bisa meleset karena ukuran porsi, bahan, minyak, saus, dan cara masak sulit terlihat. Selalu koreksi hasil scan sebelum menyimpan.</div>
+    </div>
+  </section>
+
+  <section id="scan" class="view">
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">1. Foto makanan</div>
+        <div class="scanbox">
+          <div style="font-size:42px">📸</div>
+          <p style="margin-top:8px;font-weight:800">Ambil foto atau pilih dari galeri</p>
+          <p class="muted small" style="margin-top:4px">Ambil foto dari atas agar jenis makanan dan porsinya lebih mudah diperkirakan.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap">
+            <label class="btn primary" style="display:inline-block">📷 Kamera<input id="camera" class="file" type="file" accept="image/*" capture="environment"></label>
+            <label class="btn ghost" style="display:inline-block">🖼️ Galeri<input id="gallery" class="file" type="file" accept="image/*"></label>
+          </div>
+          <img id="scanPreview" class="scanpreview">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">2. Analisis</div>
+        <div id="apiWarning" class="note">Tekan <b>Siapkan AI Vision</b> di <b>Setelan</b> sebelum scan. Key disimpan lokal di browser/app ini.</div>
+        <div class="grid2" style="margin-top:12px">
+          <button id="analyzeBtn" class="btn green" onclick="analyzeFood()" disabled>✨ Analisis makanan</button>
+          <button class="btn ghost" onclick="clearScan()">Reset</button>
+        </div>
+        <div id="loading" class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="font-size:13px">Sedang membaca foto dan memperkirakan porsi...</span></div>
+        <div id="result" style="display:none;margin-top:14px">
+          <img id="resultImg" class="resultimg">
+          <div style="margin-top:12px"><span class="tag">Estimasi AI</span></div>
+          <div id="foodResult" style="margin-top:10px"></div>
+          <div class="grid2" style="margin-top:12px">
+            <button class="btn primary" onclick="saveScan()">Simpan ke hari ini</button>
+            <button class="btn ghost" onclick="showView('home')">Kembali</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="history" class="view">
+    <div class="grid">
+      <div class="row">
+        <div><div class="section-title" style="margin:0">Riwayat</div><div class="muted small">Semua makanan tersimpan di perangkat ini.</div></div>
+        <button class="btn danger" onclick="clearAll()">Hapus semua</button>
+      </div>
+      <div id="historyList" class="grid"></div>
+    </div>
+  </section>
+
+
+  <section id="planner" class="view">
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">Kalkulator BMI & target berat</div>
+        <p class="muted small">Masukkan profil dasar dan aktivitas. GiziTrack menghitung BMI, BMR, TDEE, serta target kalori untuk cutting atau bulking.</p>
+        <div class="formgrid" style="margin-top:12px">
+          <div><label>Jenis kelamin</label>
+            <select id="pSex" class="input">
+              <option value="male">Pria</option>
+              <option value="female">Wanita</option>
+            </select>
+          </div>
+          <div><label>Usia (tahun)</label><input id="pAge" class="input" type="number" min="15" max="100" placeholder="20"></div>
+          <div><label>Berat saat ini (kg)</label><input id="pWeight" class="input" type="number" step="0.1" min="20" max="300" placeholder="60"></div>
+          <div><label>Tinggi badan (cm)</label><input id="pHeight" class="input" type="number" step="0.1" min="100" max="250" placeholder="170"></div>
+          <div class="full"><label>Aktivitas harian</label>
+            <select id="pActivity" class="input">
+              <option value="1.2">Sedentary — sedikit bergerak / hampir tidak olahraga</option>
+              <option value="1.375">Light — olahraga ringan 1–3 hari/minggu</option>
+              <option value="1.55" selected>Moderate — olahraga 3–5 hari/minggu</option>
+              <option value="1.725">Very active — olahraga berat 6–7 hari/minggu</option>
+              <option value="1.9">Extra active — aktivitas fisik sangat tinggi</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn primary" style="margin-top:12px" onclick="calculatePlan()">Hitung profil</button>
+      </div>
+
+      <div id="planResult" style="display:none" class="grid">
+        <div class="card">
+          <div class="section-title">Profil tubuh</div>
+          <div class="grid2">
+            <div class="stat"><div class="lab">BMI</div><div class="bmi" id="bmiValue">—</div><div id="bmiLabel" class="bmi-label">—</div></div>
+            <div class="stat"><div class="lab">BMR</div><div class="num" id="bmrValue">—</div><div class="small muted">kcal/hari</div></div>
+          </div>
+          <div class="stat" style="margin-top:10px"><div class="lab">TDEE / Maintenance</div><div class="num" id="tdeeValue">—</div><div class="small muted">perkiraan kalori untuk mempertahankan berat sekarang</div></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Pilih tujuan</div>
+          <div class="choice">
+            <button id="cutChoice" class="goal-card selected" onclick="selectGoal('cut')">
+              <div style="font-weight:850">✂️ Cutting</div><div class="muted small">Defisit kalori untuk menurunkan berat</div>
+            </button>
+            <button id="bulkChoice" class="goal-card" onclick="selectGoal('bulk')">
+              <div style="font-weight:850">💪 Bulking</div><div class="muted small">Surplus kalori untuk menaikkan berat</div>
+            </button>
+          </div>
+          <div class="formgrid" style="margin-top:10px">
+            <div><label>Berat tujuan (kg)</label><input id="pTargetWeight" class="input" type="number" step="0.1" min="20" max="300"></div>
+            <div><label>Laju target (kg/minggu)</label><input id="pRate" class="input" type="number" step="0.1" min="0.1" max="1.0"></div>
+          </div>
+          <p class="muted small" style="margin-top:8px">Nilai laju menentukan besar defisit/surplus harian. Jangan memaksakan laju ekstrem; utamakan progres yang realistis dan konsisten.</p>
+          <button class="btn green" style="margin-top:12px" onclick="calculateGoal()">Hitung target kalori</button>
+        </div>
+
+        <div id="goalResult" class="card" style="display:none">
+          <div class="section-title">Rekomendasi asupan harian</div>
+          <div class="calc-hero">
+            <div class="muted" style="color:#d0d5dd">Target <span id="goalTypeText">cutting</span></div>
+            <div class="calc-big"><span id="goalCalories">—</span> kcal/hari</div>
+            <div class="small" style="color:#d0d5dd;margin-top:2px">Dari estimasi maintenance <span id="goalTdee">—</span> kcal</div>
+          </div>
+          <div class="grid2" style="margin-top:10px">
+            <div class="stat"><div class="lab">Berat sekarang</div><div class="num"><span id="currentWeightOut">—</span> kg</div></div>
+            <div class="stat"><div class="lab">Berat tujuan</div><div class="num"><span id="targetWeightOut">—</span> kg</div></div>
+          </div>
+          <div class="note" id="goalNote" style="margin-top:10px"></div>
+          <button class="btn primary" style="margin-top:12px;width:100%" onclick="applyGoalToApp()">Gunakan sebagai target kalori harian</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="settings" class="view">
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">Target harian</div>
+        <div class="grid2">
+          <div><label>Kalori (kcal)</label><input id="sCal" class="input" type="number" min="500" max="10000"></div>
+          <div><label>Protein (g)</label><input id="sP" class="input" type="number" min="10" max="500"></div>
+          <div><label>Karbohidrat (g)</label><input id="sC" class="input" type="number" min="10" max="1000"></div>
+          <div><label>Lemak (g)</label><input id="sF" class="input" type="number" min="5" max="300"></div>
+        </div>
+        <button class="btn green" style="margin-top:12px" onclick="saveSettings()">Simpan target</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">AI Food Scanner — Gratis</div>
+        <div class="note">Mode ini menjalankan model vision <b>langsung di browser/HP</b>. Tidak membutuhkan Gemini API key atau OpenAI API key. Pada pemakaian pertama, model sekitar puluhan MB perlu diunduh lalu browser akan menyimpannya di cache.</div>
+        <div style="margin-top:12px">
+          <label>Mode akselerasi</label>
+          <select id="localDevice" class="input">
+            <option value="auto" selected>Otomatis (WebGPU jika tersedia)</option>
+            <option value="webgpu">WebGPU</option>
+            <option value="wasm">CPU/WASM</option>
+          </select>
+        </div>
+        <button class="btn primary" style="margin-top:12px" onclick="loadLocalAI()">🚀 Siapkan AI Vision</button>
+        <div id="localStatus" class="small muted" style="margin-top:8px">AI belum dimuat.</div>
+        <p class="muted small" style="margin-top:8px">Model Food-101 paling kuat pada 101 kategori makanan dari dataset Food-101. Untuk masakan Indonesia yang tidak ada di 101 kategori, kamu tetap bisa mengoreksi nama/porsi secara manual.</p>
+      </div>
+      <div class="card">
+        <div class="section-title">Data</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost" onclick="exportData()">Export JSON</button>
+          <label class="btn ghost" style="display:inline-block">Import JSON<input id="importFile" class="file" type="file" accept="application/json"></label>
+          <button class="btn danger" onclick="resetApp()">Reset aplikasi</button>
+        </div>
+      </div>
+
+      <div class="install card" id="installCard">
+        <div class="section-title">Pasang ke Android</div>
+        <p class="muted small">Aplikasi ini adalah PWA. Dari Chrome Android, pilih menu <b>Tambahkan ke layar utama</b> / <b>Install app</b>.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="nav">
+  <button data-view="home" class="active"><span class="ni">🏠</span>Beranda</button>
+  <button data-view="scan"><span class="ni">📷</span>Scan</button>
+  <button data-view="planner"><span class="ni">🎯</span>Target</button>
+  <button data-view="history"><span class="ni">📒</span>Riwayat</button>
+  <button data-view="settings"><span class="ni">⚙️</span>Setelan</button>
+</nav>
+<div id="toast" class="toast"></div>
+
+
+<script type="module">
+  import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm";
+  window.HF_PIPELINE = pipeline;
+  window.HF_ENV = env;
+</script>
+
+<script>
+const KEY='gizitrack_v1';
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
+  meals:[],goals:{cal:2000,p:120,c:250,f:65},model:'local-food101',profile:{sex:'male',age:20,weight:60,height:170,activity:1.55,targetWeight:60,rate:0.25,goal:'cut'}
+};
+let scanData=null, selectedImageData=null, deferredInstall=null, currentPlan=null, localClassifier=null, localLoading=false;
+
+const $=id=>document.getElementById(id);
+ensureProfile();
+function saveState(){localStorage.setItem(KEY,JSON.stringify(state));}
+function ensureProfile(){state.profile=Object.assign({sex:'male',age:20,weight:60,height:170,activity:1.55,targetWeight:60,rate:0.25,goal:'cut'},state.profile||{});}
+function today(){return new Date().toISOString().slice(0,10);}
+function fmt(n){return Number(n||0).toLocaleString('id-ID',{maximumFractionDigits:1});}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>$('toast').classList.remove('show'),2400);}
+function showView(id){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===id));
+  if(id==='home')renderHome(); if(id==='history')renderHistory(); if(id==='settings')loadSettings(); if(id==='planner')loadPlanner();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+
+function totals(){
+  return state.meals.filter(m=>m.date===today()).reduce((a,m)=>({
+    cal:a.cal+Number(m.cal||0),p:a.p+Number(m.p||0),c:a.c+Number(m.c||0),f:a.f+Number(m.f||0)
+  }),{cal:0,p:0,c:0,f:0});
+}
+function setProg(id,val,goal){$(id).style.width=Math.min(100,Math.max(0,(val/Math.max(goal,1))*100))+'%';}
+function renderHome(){
+  const t=totals(); $('sumCal').textContent=fmt(t.cal); $('goalCal').textContent=fmt(state.goals.cal);
+  $('sumP').textContent=fmt(t.p);$('sumC').textContent=fmt(t.c);$('sumF').textContent=fmt(t.f);
+  setProg('calProg',t.cal,state.goals.cal);setProg('pProg',t.p,state.goals.p);setProg('cProg',t.c,state.goals.c);setProg('fProg',t.f,state.goals.f);
+  const list=$('todayList'); const meals=state.meals.filter(m=>m.date===today()).sort((a,b)=>b.ts-a.ts);
+  if(!meals.length){list.innerHTML='<div class="empty">Belum ada makanan hari ini.<br><span class="small">Tekan “Scan makanan” untuk mulai.</span></div>';return}
+  list.innerHTML=meals.map(m=>mealHTML(m,true)).join('');
+}
+function mealHTML(m,withDelete=false){
+  return `<div class="meal">
+    ${m.image?`<img class="thumb" src="${m.image}" alt="">`:`<div class="thumb" style="display:grid;place-items:center;font-size:27px">🍽️</div>`}
+    <div style="flex:1;min-width:0"><div class="row start"><div><div class="name">${esc(m.name)}</div><div class="meta">${esc(m.portion||'1 porsi')} · ${new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</div></div><div class="cal">${fmt(m.cal)} kcal</div></div>
+    <div class="macrobar">
+      <div class="macro"><b>${fmt(m.p)}g</b><span>Protein</span></div>
+      <div class="macro"><b>${fmt(m.c)}g</b><span>Karbo</span></div>
+      <div class="macro"><b>${fmt(m.f)}g</b><span>Lemak</span></div>
+    </div>
+    ${withDelete?`<button class="btn danger" style="margin-top:8px;padding:8px 10px" onclick="deleteMeal('${m.id}')">Hapus</button>`:''}
+    </div>
+  </div>`;
+}
+function renderHistory(){
+  const box=$('historyList');
+  if(!state.meals.length){box.innerHTML='<div class="card empty">Belum ada riwayat.</div>';return}
+  const by={}; state.meals.forEach(m=>(by[m.date]??=[]).push(m));
+  box.innerHTML=Object.keys(by).sort().reverse().map(d=>`<div class="card">
+    <div class="row" style="margin-bottom:10px"><b>${new Date(d+'T12:00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</b><span class="tag">${fmt(by[d].reduce((s,m)=>s+m.cal,0))} kcal</span></div>
+    <div class="list">${by[d].sort((a,b)=>b.ts-a.ts).map(m=>mealHTML(m,true)).join('')}</div>
+  </div>`).join('');
+}
+function deleteMeal(id){state.meals=state.meals.filter(m=>m.id!==id);saveState();renderHome();renderHistory();toast('Makanan dihapus.');}
+function clearAll(){if(confirm('Hapus semua riwayat makanan?')){state.meals=[];saveState();renderHome();renderHistory();toast('Riwayat dihapus.');}}
+function loadSettings(){
+  $('sCal').value=state.goals.cal;$('sP').value=state.goals.p;$('sC').value=state.goals.c;$('sF').value=state.goals.f;
+  if($('localDevice')) $('localDevice').value=state.localDevice||'auto';
+}
+function saveSettings(){
+  state.goals={cal:+$('sCal').value||2000,p:+$('sP').value||120,c:+$('sC').value||250,f:+$('sF').value||65};saveState();renderHome();toast('Target harian disimpan.');
+}
+
+
+async function loadLocalAI(){
+  if(localLoading){return}
+  if(localClassifier){$('localStatus').textContent='✅ AI Vision sudah siap.';updateAIState();return}
+  if(!window.HF_PIPELINE){$('localStatus').textContent='❌ Engine AI belum termuat. Periksa koneksi internet lalu buka ulang aplikasi.';return}
+  localLoading=true; $('localStatus').textContent='⏳ Mengunduh model AI untuk pertama kali...';
+  try{
+    const mode=$('localDevice')?.value||state.localDevice||'auto'; state.localDevice=mode; saveState();
+    let device=mode==='wasm'?'wasm':'webgpu';
+    if(mode==='auto' && !('gpu' in navigator)) device='wasm';
+    localClassifier=await window.HF_PIPELINE(
+      'image-classification',
+      'onnx-community/swin-finetuned-food101-ONNX',
+      {device, dtype: device==='webgpu' ? 'q4f16' : 'q8'}
+    );
+    $('localStatus').textContent=`✅ AI Vision siap (${device.toUpperCase()}).`;
+    updateAIState();toast('AI Vision gratis siap digunakan.');
+  }catch(err){
+    console.error(err);
+    localClassifier=null;
+    $('localStatus').textContent='❌ Gagal memuat model: '+(err?.message||err);
+    toast('AI belum berhasil dimuat.');
+  }finally{localLoading=false;}
+}
+
+async function testApiKey(){
+  // kept for compatibility with old state/button references
+  await loadLocalAI();
+}
+function saveApi(){state.localDevice=$('localDevice')?.value||'auto';saveState();toast('Pengaturan AI lokal disimpan.')} 
+function updateAIState(){
+  const ok=!!selectedImageData && !!localClassifier;
+  $('analyzeBtn').disabled=!ok;
+  $('apiWarning').style.display='none';
+}
+function clearScan(){
+  selectedImageData=null;scanData=null;$('scanPreview').style.display='none';$('scanPreview').src='';$('result').style.display='none';$('resultImg').style.display='none';$('foodResult').innerHTML='';$('camera').value='';$('gallery').value='';updateAIState();
+}
+async function handleFile(file){
+  if(!file)return;
+  const img=new Image(); const url=URL.createObjectURL(file);
+  img.onload=()=>{const max=1280, scale=Math.min(1,max/Math.max(img.width,img.height)),w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+    const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+    selectedImageData=c.toDataURL('image/jpeg',0.82);
+    $('scanPreview').src=selectedImageData;$('scanPreview').style.display='block';
+    $('resultImg').src=selectedImageData;$('resultImg').style.display='block';
+    URL.revokeObjectURL(url);updateAIState();
+  }; img.src=url;
+}
+$('camera').onchange=e=>handleFile(e.target.files[0]); $('gallery').onchange=e=>handleFile(e.target.files[0]);
+
+async function analyzeFood(){
+  if(!selectedImageData){toast('Ambil foto terlebih dahulu.');return}
+  if(!localClassifier){toast('Tekan “Siapkan AI Vision” di Setelan terlebih dahulu.');return}
+  $('loading').classList.add('on');$('result').style.display='none';
+  try{
+    const outputs=await localClassifier(selectedImageData,{topk:5});
+    const primary=outputs?.[0];
+    if(!primary)throw new Error('Model tidak menghasilkan prediksi.');
+
+    const normalized=String(primary.label||'').toLowerCase().trim();
+    const alias={
+      'chicken wings':'sayap ayam',
+      'fried chicken':'ayam goreng',
+      'grilled salmon':'salmon panggang',
+      'pizza':'pizza',
+      'hamburger':'burger',
+      'ramen':'ramen',
+      'sushi':'sushi',
+      'spaghetti carbonara':'spaghetti carbonara',
+      'spaghetti bolognese':'spaghetti bolognese',
+      'macaroni and cheese':'mac and cheese',
+      'french fries':'kentang goreng',
+      'hot dog':'hot dog',
+      'ice cream':'es krim',
+      'pancakes':'pancake',
+      'waffles':'waffle',
+      'fried rice':'nasi goreng',
+      'paella':'paella',
+      'steak':'steak',
+      'caesar salad':'caesar salad',
+      'greek salad':'greek salad',
+      'chocolate cake':'kue cokelat',
+      'cheesecake':'cheesecake',
+      'donuts':'donat',
+      'tacos':'taco',
+      'dumplings':'dumpling',
+      'spring rolls':'lumpia'
+    };
+    // Common Food-101 labels with a rough "one plate/serving" nutrition starting point.
+    // These numbers are intentionally editable and are not a lab measurement.
+    const nutrition={
+      'fried chicken':[320,25,12,19],
+      'pizza':[285,12,36,10],
+      'hamburger':[520,28,40,27],
+      'ramen':[430,18,57,15],
+      'sushi':[330,14,52,8],
+      'spaghetti carbonara':[520,19,63,21],
+      'spaghetti bolognese':[510,24,62,17],
+      'french fries':[365,4,48,17],
+      'ice cream':[210,4,28,11],
+      'pancakes':[350,8,52,12],
+      'waffles':[370,9,50,15],
+      'fried rice':[520,17,72,17],
+      'steak':[520,45,0,36],
+      'caesar salad':[330,10,18,24],
+      'greek salad':[260,7,12,21],
+      'chocolate cake':[420,6,57,19],
+      'cheesecake':[400,7,34,27],
+      'donuts':[260,4,31,14],
+      'tacos':[390,18,38,19],
+      'dumplings':[280,11,34,11],
+      'spring rolls':[240,5,28,12],
+      'hot dog':[290,11,25,16],
+      'macaroni and cheese':[440,16,48,20]
+    };
+    const name=alias[normalized]||String(primary.label||'Makanan terdeteksi').replaceAll('_',' ');
+    const n=nutrition[normalized]||[350,15,45,14];
+    const confidence=primary.score>=.75?'high':primary.score>=.45?'medium':'low';
+    scanData={
+      meal_name:name.replace(/\b\w/g,c=>c.toUpperCase()),
+      portion:'1 porsi (estimasi awal)',
+      items:[{name:name.replace(/\b\w/g,c=>c.toUpperCase()),portion:'1 porsi',calories:n[0],protein_g:n[1],carbs_g:n[2],fat_g:n[3]}],
+      total:{calories:n[0],protein_g:n[1],carbs_g:n[2],fat_g:n[3]},
+      confidence,
+      notes:`Model mengenali “${String(primary.label||'').replaceAll('_',' ')}” dengan confidence ${(primary.score*100).toFixed(0)}%. Angka gizi adalah estimasi awal berbasis porsi umum dan harus dikoreksi sesuai porsi nyata.`
+    };
+    scanData.alternatives=(outputs||[]).slice(1,5).map(x=>({label:x.label,score:x.score}));
+    renderScanResult();
+  }catch(err){
+    console.error(err);toast('Analisis lokal gagal: '+(err?.message||err));
+  }finally{$('loading').classList.remove('on');}
+}
+function renderScanResult(){
+  const d=scanData; if(!d) return;
+  $('foodResult').innerHTML=`<div class="grid">
+    <div class="row"><div><div style="font-size:18px;font-weight:850">${esc(d.meal_name||'Makanan terdeteksi')}</div><div class="muted small">${esc(d.portion||'Estimasi porsi')}</div></div><span class="tag">Confidence: ${esc(d.confidence||'medium')}</span></div>
+    <div class="item"><div class="section-title">Komponen makanan</div><div class="list" id="resultItems">
+      ${(d.items||[]).map((it,i)=>`<div class="item">
+        <div style="font-weight:750;margin-bottom:8px">${esc(it.name||'Komponen '+(i+1))}</div>
+        <div class="itemgrid">
+          <div><label>Porsi</label><input class="input ri-portion" data-i="${i}" value="${esc(it.portion||'')}"></div>
+          <div><label>Kalori</label><input class="input ri-cal" data-i="${i}" type="number" value="${Number(it.calories||0)}"></div>
+          <div><label>Protein (g)</label><input class="input ri-p" data-i="${i}" type="number" step=".1" value="${Number(it.protein_g||0)}"></div>
+          <div><label>Karbo (g)</label><input class="input ri-c" data-i="${i}" type="number" step=".1" value="${Number(it.carbs_g||0)}"></div>
+          <div><label>Lemak (g)</label><input class="input ri-f" data-i="${i}" type="number" step=".1" value="${Number(it.fat_g||0)}"></div>
+        </div>
+      </div>`).join('')}
+    </div></div>
+    <div class="grid2"><div class="stat"><div class="lab">Kalori</div><div class="num" id="rCal">0</div></div><div class="stat"><div class="lab">Protein</div><div class="num" id="rP">0g</div></div></div>
+    <div class="grid2"><div class="stat"><div class="lab">Karbo</div><div class="num" id="rC">0g</div></div><div class="stat"><div class="lab">Lemak</div><div class="num" id="rF">0g</div></div></div>
+    <div class="note">${esc(d.notes||'Koreksi angka sesuai porsi yang kamu makan sebelum menyimpan.')}</div>
+    ${d.alternatives?.length?`<div class="item"><div class="section-title">Prediksi lain</div><div class="list">${d.alternatives.map(x=>`<div class="row"><span>${esc(String(x.label).replaceAll('_',' '))}</span><span class="muted small">${(x.score*100).toFixed(1)}%</span></div>`).join('')}</div></div>`:''}
+  </div>`;
+  $('result').style.display='block'; bindResultCalc(); calcResult();
+}
+function bindResultCalc(){document.querySelectorAll('#result input').forEach(x=>x.addEventListener('input',calcResult));}
+function calcResult(){
+  const rows=[...document.querySelectorAll('#resultItems .item')];let cal=0,p=0,c=0,f=0;
+  rows.forEach((r,i)=>{cal+=+r.querySelector('.ri-cal')?.value||0;p+=+r.querySelector('.ri-p')?.value||0;c+=+r.querySelector('.ri-c')?.value||0;f+=+r.querySelector('.ri-f')?.value||0});
+  $('rCal').textContent=fmt(cal)+' kcal';$('rP').textContent=fmt(p)+'g';$('rC').textContent=fmt(c)+'g';$('rF').textContent=fmt(f)+'g';
+}
+function saveScan(){
+  if(!scanData){toast('Belum ada hasil scan.');return}
+  const rows=[...document.querySelectorAll('#resultItems .item')];let cal=0,p=0,c=0,f=0;const items=[];
+  rows.forEach((r,i)=>{
+    const src=scanData.items?.[i]||{};const item={name:src.name||('Komponen '+(i+1)),portion:r.querySelector('.ri-portion')?.value||'',cal:+r.querySelector('.ri-cal')?.value||0,p:+r.querySelector('.ri-p')?.value||0,c:+r.querySelector('.ri-c')?.value||0,f:+r.querySelector('.ri-f')?.value||0};
+    cal+=item.cal;p+=item.p;c+=item.c;f+=item.f;items.push(item);
+  });
+  const m={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),date:today(),ts:Date.now(),name:scanData.meal_name||'Makanan',portion:scanData.portion||'1 porsi',cal,p,c,f,image:selectedImageData,items};
+  state.meals.push(m);saveState();toast('Makanan tersimpan.');clearScan();showView('home');
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gizitrack-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{state=JSON.parse(await f.text());saveState();renderHome();toast('Data berhasil diimpor.');}catch{toast('File JSON tidak valid.')}e.target.value='';};
+
+function loadPlanner(){
+  ensureProfile();
+  const pr=state.profile;
+  $('pSex').value=pr.sex;$('pAge').value=pr.age;$('pWeight').value=pr.weight;$('pHeight').value=pr.height;$('pActivity').value=pr.activity;
+  $('pTargetWeight').value=pr.targetWeight ?? pr.weight;$('pRate').value=pr.rate ?? 0.25;
+  selectGoal(pr.goal||'cut',false);
+}
+function selectGoal(goal, saveNow=true){
+  ensureProfile(); state.profile.goal=goal;
+  $('cutChoice').classList.toggle('selected',goal==='cut');$('bulkChoice').classList.toggle('selected',goal==='bulk');
+  $('goalTypeText').textContent=goal==='cut'?'cutting':'bulking';
+  if(saveNow)saveState();
+}
+function bmiClass(bmi){
+  if(bmi<18.5)return ['Kurus','#b42318','#fef3f2'];
+  if(bmi<25)return ['Normal','#087443','#ecfdf3'];
+  if(bmi<30)return ['Overweight','#b54708','#fffaeb'];
+  return ['Obesitas','#b42318','#fef3f2'];
+}
+function calculatePlan(){
+  const sex=$('pSex').value, age=+$('pAge').value, weight=+$('pWeight').value, height=+$('pHeight').value, activity=+$('pActivity').value;
+  if(!age||!weight||!height){toast('Isi usia, berat, dan tinggi terlebih dahulu.');return}
+  const bmi=weight/((height/100)**2);
+  const bmr=10*weight+6.25*height-5*age+(sex==='male'?5:-161);
+  const tdee=bmr*activity;
+  ensureProfile();
+  Object.assign(state.profile,{sex,age,weight,height,activity});
+  const bc=bmiClass(bmi);
+  $('bmiValue').textContent=bmi.toFixed(1);
+  $('bmiLabel').textContent=bc[0];$('bmiLabel').style.color=bc[1];$('bmiLabel').style.background=bc[2];
+  $('bmrValue').textContent=Math.round(bmr).toLocaleString('id-ID');
+  $('tdeeValue').textContent=Math.round(tdee).toLocaleString('id-ID');
+  $('planResult').style.display='grid';
+  currentPlan={bmi,bmr,tdee};
+  calculateGoal();
+  saveState();
+}
+function calculateGoal(){
+  if(!currentPlan){calculatePlan(); if(!currentPlan)return;}
+  const goal=state.profile.goal||'cut';
+  const target=+$('pTargetWeight').value, rate=+$('pRate').value;
+  const weight=+state.profile.weight;
+  if(!target||!rate){toast('Isi berat tujuan dan laju target.');return}
+  state.profile.targetWeight=target;state.profile.rate=rate;
+  // Approximate energy equivalent: 7,700 kcal per kg of body mass.
+  // Daily adjustment = weekly rate * 7700 / 7.
+  let delta=rate*7700/7;
+  let targetCal=goal==='cut'?currentPlan.tdee-delta:currentPlan.tdee+delta;
+  // Avoid extreme computed targets for a general-purpose app.
+  const floor=goal==='cut'?1200:1500;
+  targetCal=Math.max(floor,Math.round(targetCal));
+  const days=Math.abs(target-weight)/rate*7;
+  const weeks=days/7;
+  $('goalCalories').textContent=targetCal.toLocaleString('id-ID');
+  $('goalTdee').textContent=Math.round(currentPlan.tdee).toLocaleString('id-ID');
+  $('currentWeightOut').textContent=weight.toFixed(1);
+  $('targetWeightOut').textContent=target.toFixed(1);
+  $('goalTypeText').textContent=goal==='cut'?'cutting':'bulking';
+  $('goalNote').innerHTML=goal==='cut'
+    ? `Estimasi laju <b>-${rate.toFixed(1)} kg/minggu</b>. Dengan berat sekarang ${weight.toFixed(1)} kg menuju ${target.toFixed(1)} kg, waktu teoritis sekitar <b>${Math.max(0.1,weeks).toFixed(1)} minggu</b>. Ini estimasi matematis, bukan jaminan hasil nyata.`
+    : `Estimasi laju <b>+${rate.toFixed(1)} kg/minggu</b>. Dengan berat sekarang ${weight.toFixed(1)} kg menuju ${target.toFixed(1)} kg, waktu teoritis sekitar <b>${Math.max(0.1,weeks).toFixed(1)} minggu</b>. Kenaikan berat tidak seluruhnya berupa otot.`;
+  $('goalResult').style.display='block';
+  currentPlan.goalCalories=targetCal;
+  saveState();
+}
+function applyGoalToApp(){
+  if(!currentPlan?.goalCalories){toast('Hitung target kalori terlebih dahulu.');return}
+  state.goals.cal=currentPlan.goalCalories;
+  saveState();renderHome();toast('Target kalori diterapkan ke beranda.');
+}
+
+function resetApp(){if(confirm('Reset semua data, target, dan API key?')){localStorage.removeItem(KEY);location.reload();}}
+
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;document.querySelector('#installCard').classList.add('show');});
+document.querySelector('#installCard').onclick=async()=>{if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;}};
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+ensureProfile();loadSettings();updateAIState();renderHome();
+</script>
+</body>
+</html>
